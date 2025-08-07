@@ -7,4 +7,5 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - spawn-sync
+  - supabase
   - workerd

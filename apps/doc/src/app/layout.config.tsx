@@ -12,9 +12,10 @@ export const baseOptions: BaseLayoutProps = {
     title: (
       <>
         <svg aria-label="Logo" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <title>Tab Trackr</title>
           <circle cx={12} cy={12} fill="currentColor" r={12} />
         </svg>
-        My App
+        Tab Trackr
       </>
     ),
   },

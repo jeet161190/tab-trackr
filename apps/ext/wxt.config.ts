@@ -1,6 +1,5 @@
 // import tailwindcss from '@tailwindcss/vite';
-
-import react from '@vitejs/plugin-react-swc';
+// import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'wxt';
 
 // See https://wxt.dev/api/config.html
@@ -21,10 +20,10 @@ export default defineConfig({
   zip: {
     name: 'tab-trackr',
   },
-  vite: () => ({
-    plugins: [react({ devTarget: 'esnext' })],
-    build: {
-      target: 'esnext',
-    },
-  }),
+  // vite: () => ({
+  //   plugins: [react({ devTarget: 'esnext' }), tailwindcss()],
+  //   build: {
+  //     target: 'esnext',
+  //   },
+  // }),
 });
