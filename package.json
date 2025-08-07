@@ -1,0 +1,33 @@
+{
+  "name": "tab-trackr",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.4",
+    "ultracite": "5.1.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "npx ultracite format"
+    ]
+  },
+  "packageManager": "pnpm@10.12.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "check": "biome check --write .",
+    "check-types": "turbo check-types",
+    "dev": "turbo dev",
+    "dev:native": "turbo -F native dev",
+    "dev:server": "turbo -F server dev",
+    "dev:web": "turbo -F web dev",
+    "format:ws": "pnpm dlx syncpack@alpha format",
+    "lint:ws": "pnpm dlx sherif@latest",
+    "postinstall": "pnpm run lint:ws && pnpm run format:ws",
+    "update:ws": "pnpm dlx taze -r"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}
