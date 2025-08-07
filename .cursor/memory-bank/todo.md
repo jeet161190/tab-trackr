@@ -177,19 +177,16 @@
 
 ## 📋 Current Sprint Focus
 
-### Week 1-2: Foundation (COMPLETED ✅)
+### Hour 1-4: Foundation (PARTIALLY COMPLETED ✅)
 
 - [✅] Complete Chrome extension manifest and permissions
 - [✅] Implement basic tab tracking functionality
 - [ ] Setup Supabase project and basic auth
-
-### Week 3-4: Core Features (COMPLETED ✅)
-
 - [✅] Build extension popup interface
 - [✅] Create dashboard authentication flow
 - [✅] Implement data sync between extension and backend
 
-### Week 5-6: Polish & Testing
+### Hour 5-6: Polish & Testing
 
 - [ ] Add basic analytics and charts
 - [ ] Implement privacy controls
@@ -199,7 +196,7 @@
 
 ## 📝 Notes
 
-- Use TDD approach for critical tracking logic
+- Use the TDD approach for critical tracking logic
 - Focus on performance and battery optimization
 - Prioritize user privacy and transparent data handling
 - Follow Chrome Web Store policies strictly
