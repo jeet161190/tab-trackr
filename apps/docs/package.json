@@ -1,5 +1,5 @@
 {
-  "name": "fumadocs",
+  "name": "docs",
   "version": "0.0.0",
   "dependencies": {
     "fumadocs-core": "15.6.9",
@@ -12,16 +12,17 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^22",
+    "@types/node": "^22.10.2",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
-    "typescript": "^5.9.2"
+    "typescript": "^5.7.2"
   },
   "private": true,
   "scripts": {
     "build": "next build",
+    "clean": "rm -rf .source node_modules",
     "dev": "next dev --turbo --port=4000",
     "postinstall": "fumadocs-mdx",
     "start": "next start"

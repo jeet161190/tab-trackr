@@ -1,22 +1,27 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
-  "version": "0.0.0",
+  "name": "extension",
+  "description": "Track your browsing habits and boost productivity with team insights",
+  "version": "0.1.0",
   "dependencies": {
+    "clsx": "^2.1.1",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react-swc": "^4.0.0",
     "@wxt-dev/module-react": "^1.1.3",
-    "typescript": "^5.9.2",
     "wxt": "^0.20.6"
   },
   "private": true,
   "scripts": {
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
+    "clean": "rm -rf .output .wxt node_modules",
     "compile": "tsc --noEmit",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
