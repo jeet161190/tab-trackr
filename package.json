@@ -5,6 +5,7 @@
     "@types/node": "^22.10.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
+    "supabase": "^2.33.9",
     "turbo": "^2.5.4",
     "typescript": "^5.7.2",
     "ultracite": "5.1.1"

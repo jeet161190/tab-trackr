@@ -42,5 +42,3 @@ build
 .react-router/
 
 .turbo
-
-.cursor/memory-bank/

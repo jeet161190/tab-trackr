@@ -3,6 +3,7 @@
   "description": "Track your browsing habits and boost productivity with team insights",
   "version": "0.1.0",
   "dependencies": {
+    "@supabase/supabase-js": "^2.53.1",
     "clsx": "^2.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -21,8 +22,8 @@
   "scripts": {
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf .output .wxt node_modules",
-    "compile": "tsc --noEmit",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "postinstall": "wxt prepare",

@@ -19,6 +19,12 @@ interface DailyStats {
   sessions: TabSession[];
 }
 
+interface SyncStatus {
+  lastSync: string | null;
+  isOnline: boolean;
+  pendingSessions: number;
+}
+
 function formatTime(milliseconds: number): string {
   const seconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -70,6 +76,9 @@ function App() {
   const [isTrackingEnabled, setIsTrackingEnabled] = useState(true);
   const [isToggling, setIsToggling] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const loadData = useCallback(async () => {
     logger.debug('Loading popup data', { component: 'PopupApp' });
@@ -116,6 +125,19 @@ function App() {
       logger.debug('Tracking status loaded', {
         component: 'PopupApp',
         trackingEnabled: trackingResponse,
+      });
+
+      // Get sync status
+      logger.trace('Requesting sync status', { component: 'PopupApp' });
+      const syncResponse = (await browser.runtime.sendMessage({
+        action: 'GET_SYNC_STATUS',
+      })) as SyncStatus;
+      setSyncStatus(syncResponse);
+      logger.debug('Sync status loaded', {
+        component: 'PopupApp',
+        lastSync: syncResponse.lastSync,
+        isOnline: syncResponse.isOnline,
+        pendingSessions: syncResponse.pendingSessions,
       });
 
       logger.timeEnd('PopupApp Data Load');
@@ -262,6 +284,67 @@ function App() {
     }
   }, []);
 
+  const authenticateGoogle = useCallback(async () => {
+    logger.info('User requested Google authentication', { component: 'PopupApp' });
+
+    try {
+      setIsAuthenticating(true);
+      const success = (await browser.runtime.sendMessage({
+        action: 'AUTHENTICATE_GOOGLE',
+      })) as boolean;
+
+      if (success) {
+        logger.info('Google authentication successful', { component: 'PopupApp' });
+        await loadData(); // Refresh data after auth
+      } else {
+        logger.warn('Google authentication failed', { component: 'PopupApp' });
+        setError('Failed to authenticate with Google');
+      }
+    } catch (err) {
+      logger.error('Authentication error', err as Error, { component: 'PopupApp' });
+      setError('Authentication failed');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }, [loadData]);
+
+  const signOut = useCallback(async () => {
+    logger.info('User requested sign out', { component: 'PopupApp' });
+
+    try {
+      await browser.runtime.sendMessage({ action: 'SIGN_OUT' });
+      logger.info('Sign out successful', { component: 'PopupApp' });
+      await loadData(); // Refresh data after sign out
+    } catch (err) {
+      logger.error('Sign out error', err as Error, { component: 'PopupApp' });
+      setError('Failed to sign out');
+    }
+  }, [loadData]);
+
+  const forceSync = useCallback(async () => {
+    logger.info('User requested force sync', { component: 'PopupApp' });
+
+    try {
+      setIsSyncing(true);
+      const success = (await browser.runtime.sendMessage({
+        action: 'FORCE_SYNC',
+      })) as boolean;
+
+      if (success) {
+        logger.info('Force sync successful', { component: 'PopupApp' });
+        await loadData(); // Refresh data after sync
+      } else {
+        logger.warn('Force sync failed', { component: 'PopupApp' });
+        setError('Sync failed');
+      }
+    } catch (err) {
+      logger.error('Force sync error', err as Error, { component: 'PopupApp' });
+      setError('Sync failed');
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [loadData]);
+
   if (isLoading && !dailyStats) {
     logger.debug('Rendering loading state', { component: 'PopupApp' });
     return (
@@ -366,6 +449,52 @@ function App() {
               </button>
             </div>
           </div>
+          <div className="settings-group">
+            <h4>Cloud Sync</h4>
+            {syncStatus && (
+              <div className="sync-status">
+                <div className="sync-indicator">
+                  <span className={`status-dot ${syncStatus.isOnline ? 'online' : 'offline'}`} />
+                  <span className="status-text">
+                    {syncStatus.isOnline ? 'Synced' : 'Offline'}
+                    {syncStatus.pendingSessions > 0 && ` (${syncStatus.pendingSessions} pending)`}
+                  </span>
+                </div>
+                {syncStatus.lastSync && (
+                  <div className="last-sync">
+                    Last sync: {new Date(syncStatus.lastSync).toLocaleString()}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="sync-actions">
+              {syncStatus?.isOnline ? (
+                <>
+                  <button
+                    className="action-btn sync-btn"
+                    disabled={isSyncing}
+                    onClick={forceSync}
+                    type="button"
+                  >
+                    {isSyncing ? '🔄 Syncing...' : '🔄 Sync Now'}
+                  </button>
+                  <button className="action-btn signout-btn" onClick={signOut} type="button">
+                    🚪 Sign Out
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="action-btn auth-btn"
+                  disabled={isAuthenticating}
+                  onClick={authenticateGoogle}
+                  type="button"
+                >
+                  {isAuthenticating ? '🔄 Signing in...' : '🔐 Sign in with Google'}
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="settings-group">
             <h4>Data Management</h4>
             <div className="settings-actions">

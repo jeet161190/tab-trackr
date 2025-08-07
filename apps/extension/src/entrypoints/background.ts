@@ -1,4 +1,5 @@
 import { logger } from '../lib/logger';
+import { syncService } from '../lib/sync-service';
 
 interface TabSession {
   url: string;
@@ -81,6 +82,10 @@ class TabTracker {
 
       await this.performDataCleanupIfNeeded();
       logger.initializationStep('performDataCleanupIfNeeded', true, { component: 'TabTracker' });
+
+      // Initialize sync service
+      await syncService.initialize();
+      logger.initializationStep('syncService.initialize', true, { component: 'TabTracker' });
 
       // Get current active tab and start tracking if enabled
       if (this.isTrackingEnabled) {
@@ -454,6 +459,9 @@ class TabTracker {
       sessionsCount: this.dailyStats.sessions.length,
     });
 
+    // Sync completed session to backend
+    syncService.addPendingSession(this.currentSession);
+
     this.currentSession = null;
   }
 
@@ -749,6 +757,7 @@ class TabTracker {
       clearInterval(this.saveTimer);
     }
     this.saveDailyStats();
+    syncService.cleanup();
   }
 }
 
@@ -899,6 +908,47 @@ export default defineBackground(() => {
               returnedCount: weeks.length,
             });
             sendResponse(weeks);
+            break;
+          }
+
+          case 'AUTHENTICATE_GOOGLE': {
+            const success = await syncService.authenticateWithGoogle();
+            logger.messageHandling(msg.action, success, {
+              component: 'BackgroundMessageHandler',
+              success,
+            });
+            sendResponse(success);
+            break;
+          }
+
+          case 'SIGN_OUT': {
+            await syncService.signOut();
+            logger.messageHandling(msg.action, true, {
+              component: 'BackgroundMessageHandler',
+            });
+            sendResponse(true);
+            break;
+          }
+
+          case 'GET_SYNC_STATUS': {
+            const status = await syncService.getSyncStatus();
+            logger.messageHandling(msg.action, true, {
+              component: 'BackgroundMessageHandler',
+              lastSync: status.lastSync,
+              isOnline: status.isOnline,
+              pendingSessions: status.pendingSessions,
+            });
+            sendResponse(status);
+            break;
+          }
+
+          case 'FORCE_SYNC': {
+            const success = await syncService.syncData();
+            logger.messageHandling(msg.action, success, {
+              component: 'BackgroundMessageHandler',
+              success,
+            });
+            sendResponse(success);
             break;
           }
 

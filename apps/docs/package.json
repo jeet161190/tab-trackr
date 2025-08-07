@@ -22,6 +22,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf .source node_modules",
     "dev": "next dev --turbo --port=4000",
     "postinstall": "fumadocs-mdx",
