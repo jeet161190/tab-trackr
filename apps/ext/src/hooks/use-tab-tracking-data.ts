@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { logger } from '../lib/logger';
 
 type TabSession = {
@@ -42,107 +42,88 @@ export function useTabTrackingData(): UseTabTrackingDataReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadData = useCallback(async () => {
-    logger.debug('Loading popup data', { component: 'useTabTrackingData' });
-    logger.time('TabTrackingData Load');
+  const isLoadingRef = useRef(false);
+  const hasLoadedOnceRef = useRef(false);
+  const intervalRef = useRef<number | null>(null);
 
-    const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
-      return new Promise<T>((resolve, reject) => {
-        const timer = setTimeout(() => {
-          reject(new Error(`Timed out: ${label}`));
-        }, ms);
-        promise.then(
-          (value) => {
-            clearTimeout(timer);
-            resolve(value);
-          },
-          (reason) => {
-            clearTimeout(timer);
-            reject(reason);
+  // Wrapper that times out a message call and logs a per-call warning without throwing
+  const callWithTimeout = useCallback(
+    async <T>(action: string, timeoutMs = 3000): Promise<T | null> => {
+      try {
+        const responsePromise = browser.runtime.sendMessage({ action }) as Promise<T>;
+        const timeoutPromise = new Promise<null>((resolve) => {
+          setTimeout(() => resolve(null), timeoutMs);
+        });
+        const result = (await Promise.race([responsePromise, timeoutPromise])) as T | null;
+        if (result === null) {
+          logger.warn(
+            `Popup data: failed to load ${action.toLowerCase().replace('get_', '').replace(/_/g, ' ')}`,
+            {
+              component: 'useTabTrackingData',
+              reason: `Timed out: ${action}`,
+            }
+          );
+          return null;
+        }
+        return result;
+      } catch (err) {
+        logger.warn(
+          `Popup data: failed to load ${action.toLowerCase().replace('get_', '').replace(/_/g, ' ')}`,
+          {
+            component: 'useTabTrackingData',
+            reason: err instanceof Error ? err.message : 'Unknown error',
           }
         );
-      });
-    };
+        return null;
+      }
+    },
+    []
+  );
+
+  const loadData = useCallback(async () => {
+    if (isLoadingRef.current) {
+      // Prevent overlapping loads which caused duplicate timers and flicker
+      return;
+    }
+    isLoadingRef.current = true;
+
+    // Only time when not already timing this logical load
+    logger.debug('Loading popup data', { component: 'useTabTrackingData' });
+    logger.time('TabTrackingData Load');
+  
 
     try {
-      setIsLoading(true);
+      setIsLoading(!hasLoadedOnceRef.current);
       setError(null);
 
-      const results = await Promise.allSettled([
-        withTimeout(
-          browser.runtime.sendMessage({ action: 'GET_DAILY_STATS' }) as Promise<DailyStats | null>,
-          3000,
-          'GET_DAILY_STATS'
-        ),
-        withTimeout(
-          browser.runtime.sendMessage({
-            action: 'GET_CURRENT_SESSION',
-          }) as Promise<TabSession | null>,
-          3000,
-          'GET_CURRENT_SESSION'
-        ),
-        withTimeout(
-          browser.runtime.sendMessage({ action: 'GET_TRACKING_STATUS' }) as Promise<boolean>,
-          3000,
-          'GET_TRACKING_STATUS'
-        ),
-        withTimeout(
-          browser.runtime.sendMessage({ action: 'GET_SYNC_STATUS' }) as Promise<SyncStatus>,
-          3000,
-          'GET_SYNC_STATUS'
-        ),
+      const [statsResponse, sessionResponse, trackingResponse, syncResponse] = await Promise.all([
+        callWithTimeout<DailyStats | null>('GET_DAILY_STATS'),
+        callWithTimeout<TabSession | null>('GET_CURRENT_SESSION'),
+        callWithTimeout<boolean>('GET_TRACKING_STATUS'),
+        callWithTimeout<SyncStatus>('GET_SYNC_STATUS'),
       ]);
 
-      const [statsRes, sessionRes, trackingRes, syncRes] = results;
-
-      if (statsRes.status === 'fulfilled') {
-        setDailyStats(statsRes.value);
-      } else {
-        logger.warn('Popup data: failed to load daily stats', {
-          component: 'useTabTrackingData',
-          reason: (statsRes.reason as Error)?.message,
-        });
+      if (statsResponse !== null) {
+        setDailyStats(statsResponse);
       }
-
-      if (sessionRes.status === 'fulfilled') {
-        setCurrentSession(sessionRes.value);
-      } else {
-        logger.warn('Popup data: failed to load current session', {
-          component: 'useTabTrackingData',
-          reason: (sessionRes.reason as Error)?.message,
-        });
+      if (sessionResponse !== null) {
+        setCurrentSession(sessionResponse);
       }
-
-      if (trackingRes.status === 'fulfilled') {
-        setIsTrackingEnabled(trackingRes.value);
-      } else {
-        logger.warn('Popup data: failed to load tracking status', {
-          component: 'useTabTrackingData',
-          reason: (trackingRes.reason as Error)?.message,
-        });
+      if (typeof trackingResponse === 'boolean') {
+        setIsTrackingEnabled(trackingResponse);
       }
-
-      if (syncRes.status === 'fulfilled') {
-        setSyncStatus(syncRes.value);
-      } else {
-        logger.warn('Popup data: failed to load sync status', {
-          component: 'useTabTrackingData',
-          reason: (syncRes.reason as Error)?.message,
-        });
+      if (syncResponse !== null) {
+        setSyncStatus(syncResponse);
       }
 
       logger.timeEnd('TabTrackingData Load');
       logger.info('Tab tracking data loaded (partial ok)', {
         component: 'useTabTrackingData',
-        hasStats: statsRes.status === 'fulfilled' && !!statsRes.value,
-        hasSession: sessionRes.status === 'fulfilled' && !!sessionRes.value,
-        trackingEnabled:
-          trackingRes.status === 'fulfilled' ? Boolean(trackingRes.value) : undefined,
+        hasStats: !!statsResponse,
+        hasSession: !!sessionResponse,
+        trackingEnabled: (trackingResponse as unknown as boolean) ?? undefined,
       });
 
-      if (results.some((r) => r.status === 'rejected')) {
-        setError('Some data failed to load. Try again.');
-      }
     } catch (err) {
       logger.timeEnd('TabTrackingData Load');
       logger.error('Failed to load tab tracking data', err as Error, {
@@ -151,18 +132,31 @@ export function useTabTrackingData(): UseTabTrackingDataReturn {
       setError('Failed to load tracking data');
     } finally {
       setIsLoading(false);
+      isLoadingRef.current = false;
+      hasLoadedOnceRef.current = true;
     }
-  }, []);
+  }, [callWithTimeout]);
 
   useEffect(() => {
     loadData();
 
-    const interval = setInterval(() => {
+    // Clear existing interval if any (hot-reloads/StrictMode)
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    intervalRef.current = setInterval(() => {
       logger.trace('Auto-refreshing tab tracking data', { component: 'useTabTrackingData' });
       loadData();
-    }, 5000);
+    }, 5000) as unknown as number;
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [loadData]);
 
   return {
