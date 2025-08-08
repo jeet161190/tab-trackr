@@ -1,7 +1,7 @@
 import { logger } from '../lib/logger';
 import { syncService } from '../lib/sync-service';
 
-interface TabSession {
+type TabSession = {
   url: string;
   domain: string;
   title: string;
@@ -9,24 +9,24 @@ interface TabSession {
   lastActive: number;
   totalTime: number;
   isActive: boolean;
-}
+};
 
-interface DailyStats {
+type DailyStats = {
   date: string;
   domains: Record<string, number>; // domain -> total time in ms
   totalTime: number;
   sessions: TabSession[];
-}
+};
 
-interface WeeklyStats {
+type WeeklyStats = {
   weekStart: string; // ISO date string for Monday of the week
   totalTime: number;
   dailyBreakdown: Record<string, number>; // date -> total time
   topDomains: Record<string, number>;
   sessionCount: number;
-}
+};
 
-interface HistoricalData {
+type HistoricalData = {
   version: string;
   lastCleanup: string;
   weeklyStats: Record<string, WeeklyStats>; // week start date -> stats
@@ -36,7 +36,7 @@ interface HistoricalData {
     firstTrackingDate: string;
     topDomains: Record<string, number>;
   };
-}
+};
 
 class TabTracker {
   private currentSession: TabSession | null = null;

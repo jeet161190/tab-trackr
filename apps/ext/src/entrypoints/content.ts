@@ -1,6 +1,6 @@
 import { logger } from '../lib/logger';
 
-interface ActivityData {
+type ActivityData = {
   type: 'activity' | 'idle' | 'visibility';
   timestamp: number;
   data?: {
@@ -8,7 +8,7 @@ interface ActivityData {
     isActive?: boolean;
     activityType?: string;
   };
-}
+};
 
 class ContentActivityTracker {
   isActive = true;

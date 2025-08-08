@@ -1,12 +1,12 @@
 import { logger } from '../../../lib/logger';
 
-interface SyncStatus {
+type SyncStatus = {
   lastSync: string | null;
   isOnline: boolean;
   pendingSessions: number;
-}
+};
 
-interface SettingsPanelProps {
+type SettingsPanelProps = {
   isTrackingEnabled: boolean;
   isToggling: boolean;
   syncStatus: SyncStatus | null;
@@ -19,7 +19,7 @@ interface SettingsPanelProps {
   onExportData: () => void;
   onClearData: () => void;
   getToggleButtonText: (isToggling: boolean, isTrackingEnabled: boolean) => string;
-}
+};
 
 export function SettingsPanel({
   isTrackingEnabled,

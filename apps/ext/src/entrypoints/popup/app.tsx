@@ -5,7 +5,7 @@ import { logger } from '../../lib/logger';
 import { SettingsPanel } from './_components/settings-panel';
 import './app.css';
 
-interface TabSession {
+type TabSession = {
   url: string;
   domain: string;
   title: string;
@@ -13,7 +13,7 @@ interface TabSession {
   lastActive: number;
   totalTime: number;
   isActive: boolean;
-}
+};
 
 function formatTime(milliseconds: number): string {
   const seconds = Math.floor(milliseconds / 1000);

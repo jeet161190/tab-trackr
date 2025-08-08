@@ -12,15 +12,15 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-950">
       <div className="container mx-auto px-4 py-16">
         <div className="mb-16 text-center">
-          <h1 className="mb-6 font-bold text-5xl text-gray-900">
+          <h1 className="mb-6 font-bold text-5xl text-gray-900 dark:text-white">
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               TabTrackr
             </span>
           </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-gray-600 text-xl">
+          <p className="mx-auto mb-8 max-w-2xl text-gray-600 text-xl dark:text-gray-300">
             Track your browsing habits, boost your productivity, and gain insights into your digital
             life
           </p>
@@ -37,7 +37,7 @@ export default async function Home() {
 
         <div className="mb-16 grid gap-8 md:grid-cols-3">
           <Card className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/50">
               <svg
                 className="h-6 w-6 text-blue-600"
                 fill="none"
@@ -54,13 +54,13 @@ export default async function Home() {
               </svg>
             </div>
             <h3 className="mb-2 font-semibold text-lg">Track Time</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Automatically track time spent on websites and applications
             </p>
           </Card>
 
           <Card className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/50">
               <svg
                 className="h-6 w-6 text-green-600"
                 fill="none"
@@ -77,13 +77,13 @@ export default async function Home() {
               </svg>
             </div>
             <h3 className="mb-2 font-semibold text-lg">Analyze Patterns</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Get detailed insights and analytics about your browsing habits
             </p>
           </Card>
 
           <Card className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/50">
               <svg
                 className="h-6 w-6 text-purple-600"
                 fill="none"
@@ -100,13 +100,13 @@ export default async function Home() {
               </svg>
             </div>
             <h3 className="mb-2 font-semibold text-lg">Team Insights</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Share productivity insights with your team and collaborate
             </p>
           </Card>
         </div>
 
-        <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white">
+        <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white dark:from-blue-700 dark:to-indigo-700">
           <h2 className="mb-4 font-bold text-2xl">Ready to boost your productivity?</h2>
           <p className="mb-6 opacity-90">
             Join thousands of users who have improved their digital habits with TabTrackr
