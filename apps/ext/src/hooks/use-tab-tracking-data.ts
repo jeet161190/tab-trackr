@@ -90,7 +90,6 @@ export function useTabTrackingData(): UseTabTrackingDataReturn {
     // Only time when not already timing this logical load
     logger.debug('Loading popup data', { component: 'useTabTrackingData' });
     logger.time('TabTrackingData Load');
-  
 
     try {
       setIsLoading(!hasLoadedOnceRef.current);
@@ -123,7 +122,6 @@ export function useTabTrackingData(): UseTabTrackingDataReturn {
         hasSession: !!sessionResponse,
         trackingEnabled: (trackingResponse as unknown as boolean) ?? undefined,
       });
-
     } catch (err) {
       logger.timeEnd('TabTrackingData Load');
       logger.error('Failed to load tab tracking data', err as Error, {
